@@ -1,26 +1,15 @@
-# Use the Nginx + PHP-FPM base image
-FROM richarvey/nginx-php-fpm:1.7.2
+# Use the official PHP 8.1 image
+FROM php:8.1-fpm-alpine
+
+# Install necessary system packages and PHP extensions
+RUN apk add --no-cache nginx \
+    && docker-php-ext-install pdo pdo_mysql
 
 # Set the working directory
 WORKDIR /var/www/html
 
-# Copy the application files
+# Copy the application files to the container
 COPY . .
-
-# Image configuration
-ENV SKIP_COMPOSER 1
-ENV WEBROOT /var/www/html/public
-ENV PHP_ERRORS_STDERR 1
-ENV RUN_SCRIPTS 1
-ENV REAL_IP_HEADER 1
-
-# Laravel configuration
-ENV APP_ENV production
-ENV APP_DEBUG false
-ENV LOG_CHANNEL stderr
-
-# Allow composer to run as root
-ENV COMPOSER_ALLOW_SUPERUSER 1
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
@@ -30,6 +19,9 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 
 # Expose port 80
 EXPOSE 80
+
+# Copy the Nginx configuration file
+COPY ./nginx.conf /etc/nginx/nginx.conf
 
 # Copy the start script
 COPY start.sh /start.sh
