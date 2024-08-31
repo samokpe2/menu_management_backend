@@ -14,6 +14,11 @@ ENV APP_ENV production
 ENV APP_DEBUG false
 ENV LOG_CHANNEL stderr
 
+RUN mkdir -p /var/www/html/database && \
+    touch /var/www/html/database/database.sqlite && \
+    chmod -R 775 /var/www/html/database && \
+    chown -R www-data:www-data /var/www/html/database
+
 # Allow composer to run as root
 ENV COMPOSER_ALLOW_SUPERUSER 1
 
