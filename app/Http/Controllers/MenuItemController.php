@@ -33,6 +33,18 @@ class MenuItemController extends Controller
     public function destroy($id)
     {
         $menuItem = MenuItem::findOrFail($id);
+
+        // Prevent deletion of the root item
+        if ($menuItem->parent_id === null) {
+            return response()->json(['error' => 'The root item cannot be deleted.'], 403);
+        }
+
+        // Reassign children to the parent of the item being deleted
+        $children = MenuItem::where('parent_id', $menuItem->id)->get();
+        foreach ($children as $child) {
+            $child->update(['parent_id' => $menuItem->parent_id]);
+        }
+
         $menuItem->delete();
 
         return response()->json(null, 204);
